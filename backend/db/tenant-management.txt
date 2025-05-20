@@ -18,36 +18,36 @@ CREATE SCHEMA IF NOT EXISTS tenants_metadata;
 TENANT MANAGEMENT
 =================================================================
 
-Create tenants table
+-- Tenants table
 CREATE TABLE IF NOT EXISTS tenants_metadata.tenants (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
-    -- Identification (used in URLs and navigation)
-    church_id TEXT UNIQUE NOT NULL,                  -- 6-digit unique identifier 
-    church_name TEXT NOT NULL,                       -- Display name
-    slug TEXT UNIQUE NOT NULL,                       -- URL-friendly identifier
-    schema_name TEXT UNIQUE NOT NULL,                -- Database schema name
-    
-    -- Localization
-    country_code TEXT NOT NULL,                      -- ISO 3166-1 alpha-2 code
-    currency_code TEXT NOT NULL,                     -- ISO 4217 currency code
-    timezone TEXT NOT NULL,                          -- Timezone (e.g., 'America/New_York')
-    
-    -- Configuration
-    logo_url TEXT,                                   -- Church logo URL
-    
-    -- Status
-    is_active BOOLEAN NOT NULL DEFAULT true,         -- Whether tenant can access system
-    
-    -- Timestamps
-    created_at TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at TIMESTAMP NOT NULL DEFAULT now()
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  
+  -- Identification
+  church_id TEXT UNIQUE NOT NULL,
+  church_name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  schema_name TEXT UNIQUE NOT NULL,
+  
+  -- Localization
+  country_code TEXT NOT NULL,
+  currency_code TEXT NOT NULL,
+  timezone TEXT NOT NULL,
+  
+  -- Configuration
+  logo_url TEXT,
+  
+  -- Status
+  is_active BOOLEAN NOT NULL DEFAULT true
 );
 
 Tenants table columns
 | Column Name           | Data Type | Constraints                            | Description                                        |
 | --------------------- | --------- | -------------------------------------- | -------------------------------------------------- |
 | id                    | UUID      | PRIMARY KEY, DEFAULT gen_random_uuid() | Internal unique tenant ID                          |
+| created_at            | TIMESTAMP | NOT NULL, DEFAULT now()                | Record creation timestamp                          |
+| updated_at            | TIMESTAMP | NOT NULL, DEFAULT now()                | Record last update timestamp                       |
 | church_id             | TEXT      | UNIQUE, NOT NULL                       | 6-digit unique church identifier used in URL       |
 | church_name           | TEXT      | NOT NULL                               | Church name (non-unique)                           |
 | slug                  | TEXT      | UNIQUE, NOT NULL                       | Globally unique slug (e.g., `church_392018`)       |
@@ -56,11 +56,9 @@ Tenants table columns
 | currency_code         | TEXT      | NOT NULL                               | ISO 4217 currency code (e.g., `USD`, `INR`, `EUR`) |
 | timezone              | TEXT      | NOT NULL                               | Timezone for date/time calculations                |
 | logo_url              | TEXT      | NULLABLE                               | URL or path to church logo                         |
-| is_active             | BOOLEAN   | DEFAULT true                           | Whether the tenant is currently active             |
-| created_at            | TIMESTAMP | DEFAULT now()                          | Record creation timestamp                          |
-| updated_at            | TIMESTAMP | DEFAULT now()                          | Record last update timestamp                       |
+| is_active             | BOOLEAN   | NOT NULL, DEFAULT true                 | Whether the tenant is currently active             |
 
-Create indexes for tenants table
+-- Create indexes for tenants table
 CREATE INDEX IF NOT EXISTS idx_tenants_slug ON tenants_metadata.tenants (slug);
 CREATE INDEX IF NOT EXISTS idx_tenants_schema_name ON tenants_metadata.tenants (schema_name);
 CREATE INDEX IF NOT EXISTS idx_tenants_country_code ON tenants_metadata.tenants (country_code);
@@ -178,75 +176,74 @@ CREATE INDEX IF NOT EXISTS idx_tenant_subscriptions_next_payment_date ON tenants
 =================================================================
 USER MANAGEMENT
 =================================================================
-
-Create users table
+-- Users table
 CREATE TABLE IF NOT EXISTS tenants_metadata.users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
-    -- Tenant relationship
-    tenant_id UUID NOT NULL REFERENCES tenants_metadata.tenants(id) ON DELETE CASCADE,
-    
-    -- Basic information
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    phone TEXT NOT NULL,
-    
-    -- Authentication
-    password_hash TEXT NOT NULL,
-    role TEXT,                                       -- 'admin', 'pastor', etc.
-    
-    -- Verification status
-    email_verified BOOLEAN NOT NULL DEFAULT false,
-    phone_verified BOOLEAN NOT NULL DEFAULT false,
-    
-    -- Verification tokens
-    verification_token TEXT,                         -- For email/phone verification
-    verification_token_expires_at TIMESTAMP,
-    
-    -- Password reset
-    password_reset_token TEXT,
-    password_reset_expires_at TIMESTAMP,
-    
-    -- Security
-    failed_login_attempts INTEGER DEFAULT 0,
-    account_locked_until TIMESTAMP,
-    
-    -- Status
-    is_active BOOLEAN NOT NULL DEFAULT true,
-    
-    -- Timestamps
-    last_login_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT now(),
-    
-    -- Constraints
-    UNIQUE(tenant_id, email)                         -- Email unique per tenant
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  
+  -- Tenant relationship
+  tenant_id UUID NOT NULL REFERENCES tenants_metadata.tenants(id) ON DELETE CASCADE,
+  
+  -- Basic information
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT,
+  
+  -- Authentication
+  password_hash TEXT NOT NULL,
+  role TEXT DEFAULT 'user',
+  
+  -- Verification status
+  email_verified BOOLEAN NOT NULL DEFAULT false,
+  phone_verified BOOLEAN NOT NULL DEFAULT false,
+  
+  -- Verification tokens
+  verification_token TEXT,
+  verification_token_expires_at TIMESTAMP,
+  
+  -- Password reset
+  password_reset_token TEXT,
+  password_reset_expires_at TIMESTAMP,
+  
+  -- Security
+  failed_login_attempts INTEGER DEFAULT 0,
+  account_locked_until TIMESTAMP,
+  
+  -- Status
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  last_login_at TIMESTAMP,
+  
+  -- Constraints
+  UNIQUE(tenant_id, email)
 );
 
 Users table columns
 | Column Name                  | Data Type | Constraints                                | Description                                      |
 | ---------------------------- | --------- | ------------------------------------------ | ------------------------------------------------ |
-| id                           | UUID      | PK, DEFAULT gen_random_uuid()              | User ID                                          |
-| tenant_id                    | UUID      | FK → tenants(id) ON DELETE CASCADE         | Associated tenant                                |
+| id                           | UUID      | PRIMARY KEY, DEFAULT gen_random_uuid()     | User ID                                          |
+| created_at                   | TIMESTAMP | NOT NULL, DEFAULT now()                    | Record creation timestamp                        |
+| updated_at                   | TIMESTAMP | NOT NULL, DEFAULT now()                    | Record last update timestamp                     |
+| tenant_id                    | UUID      | NOT NULL, FK → tenants(id) ON DELETE CASCADE | Associated tenant                             |
 | first_name                   | TEXT      | NOT NULL                                   | First name                                       |
 | last_name                    | TEXT      | NOT NULL                                   | Last name                                        |
 | email                        | TEXT      | NOT NULL                                   | Login email                                      |
-| phone                        | TEXT      | NOT NULL                                   | Phone number                                     |
+| phone                        | TEXT      | NULLABLE                                   | Phone number                                     |
 | password_hash                | TEXT      | NOT NULL                                   | Password hash                                    |
-| role                         | TEXT      | NULLABLE                                   | User role (admin, pastor, etc.)                  |
-| email_verified               | BOOLEAN   | NOT NULL DEFAULT false                     | Email verification status                        |
-| phone_verified               | BOOLEAN   | NOT NULL DEFAULT false                     | Phone verification status                        |
+| role                         | TEXT      | DEFAULT 'user'                             | User role (admin, pastor, etc.)                  |
+| email_verified               | BOOLEAN   | NOT NULL, DEFAULT false                    | Email verification status                        |
+| phone_verified               | BOOLEAN   | NOT NULL, DEFAULT false                    | Phone verification status                        |
 | verification_token           | TEXT      | NULLABLE                                   | Token for email/phone verification               |
 | verification_token_expires_at| TIMESTAMP | NULLABLE                                   | Expiration time for verification token           |
 | password_reset_token         | TEXT      | NULLABLE                                   | Token for password reset                         |
 | password_reset_expires_at    | TIMESTAMP | NULLABLE                                   | Expiration time for password reset token         |
 | failed_login_attempts        | INTEGER   | DEFAULT 0                                  | Count of failed login attempts                   |
 | account_locked_until         | TIMESTAMP | NULLABLE                                   | Timestamp until account remains locked           |
-| is_active                    | BOOLEAN   | DEFAULT true                               | User active status                               |
+| is_active                    | BOOLEAN   | NOT NULL, DEFAULT true                     | User active status                               |
 | last_login_at                | TIMESTAMP | NULLABLE                                   | Last login time                                  |
-| created_at                   | TIMESTAMP | NOT NULL DEFAULT now()                     | Creation timestamp                               |
 
-Create indexes for users table
+-- Create indexes for users table
 CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON tenants_metadata.users (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON tenants_metadata.users (email);
 CREATE INDEX IF NOT EXISTS idx_users_role ON tenants_metadata.users (role);
@@ -300,42 +297,41 @@ CREATE INDEX IF NOT EXISTS idx_verification_logs_verification_type ON tenants_me
 =================================================================
 AUTHENTICATION
 =================================================================
-
-Create refresh token table for JWT authentication
+-- Refresh tokens table for JWT authentication
 CREATE TABLE IF NOT EXISTS tenants_metadata.refresh_tokens (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    
-    -- Relationships
-    user_id UUID NOT NULL REFERENCES tenants_metadata.users(id) ON DELETE CASCADE,
-    
-    -- Token details
-    token TEXT NOT NULL UNIQUE,                      -- The refresh token value
-    expires_at TIMESTAMP NOT NULL,                   -- When the token expires
-    
-    -- Security tracking
-    ip_address TEXT,                                 -- IP address used when token was created
-    user_agent TEXT,                                 -- Browser/device used when token was created
-    is_valid BOOLEAN DEFAULT TRUE,                   -- Whether token is still valid
-    
-    -- Timestamps
-    created_at TIMESTAMP NOT NULL DEFAULT now(),     -- When token was created
-    last_used_at TIMESTAMP NOT NULL DEFAULT now()    -- When token was last used
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at TIMESTAMP NOT NULL DEFAULT now(),
+  
+  -- Relationships
+  user_id UUID NOT NULL REFERENCES tenants_metadata.users(id) ON DELETE CASCADE,
+  
+  -- Token details
+  token TEXT NOT NULL UNIQUE,
+  expires_at TIMESTAMP NOT NULL,
+  
+  -- Security tracking
+  ip_address TEXT,
+  user_agent TEXT,
+  is_valid BOOLEAN DEFAULT TRUE,
+  last_used_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 Refresh tokens table columns
 | Column Name    | Data Type | Constraints                                | Description                              |
 | -------------- | --------- | ------------------------------------------ | ---------------------------------------- |
-| id             | UUID      | PK, DEFAULT gen_random_uuid()              | Token record ID                          |
-| user_id        | UUID      | FK → users(id) ON DELETE CASCADE, NOT NULL | User the token belongs to                |
+| id             | UUID      | PRIMARY KEY, DEFAULT gen_random_uuid()     | Token record ID                          |
+| created_at     | TIMESTAMP | NOT NULL, DEFAULT now()                    | Record creation timestamp                |
+| updated_at     | TIMESTAMP | NOT NULL, DEFAULT now()                    | Record last update timestamp             |
+| user_id        | UUID      | NOT NULL, FK → users(id) ON DELETE CASCADE | User the token belongs to                |
 | token          | TEXT      | NOT NULL, UNIQUE                           | The actual refresh token value           |
 | expires_at     | TIMESTAMP | NOT NULL                                   | When the token expires                   |
 | ip_address     | TEXT      | NULLABLE                                   | IP address used when creating token      |
 | user_agent     | TEXT      | NULLABLE                                   | Browser/device used when creating token  |
 | is_valid       | BOOLEAN   | DEFAULT TRUE                               | Whether token has been invalidated       |
-| created_at     | TIMESTAMP | NOT NULL DEFAULT now()                     | When token was created                   |
-| last_used_at   | TIMESTAMP | NOT NULL DEFAULT now()                     | When token was last used                 |
+| last_used_at   | TIMESTAMP | NOT NULL, DEFAULT now()                    | When token was last used                 |
 
-Create indexes for refresh tokens table
+-- Create indexes for refresh tokens table
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_id ON tenants_metadata.refresh_tokens (user_id);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON tenants_metadata.refresh_tokens (token);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON tenants_metadata.refresh_tokens (expires_at);
@@ -355,7 +351,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create triggers for automatic timestamp updates on all tables with updated_at column
+-- Create triggers for automatic timestamp updates
 CREATE TRIGGER update_tenants_updated_at
 BEFORE UPDATE ON tenants_metadata.tenants
 FOR EACH ROW EXECUTE FUNCTION tenants_metadata.update_updated_at_column();
