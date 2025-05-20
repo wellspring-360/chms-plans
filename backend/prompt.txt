@@ -1,0 +1,68 @@
+I'm building a SaaS Multi-Tenant Church Management System (for 1,000+ churches) using NestJS for the backend, based on my database configuration.
+
+I'm new to backend development, so I want to learn by building and testing small chunks step by step, with a strong focus on understanding every concept and best practices.
+
+
+Please help me with the following user things:
+
+1. Start by giving a high-level backend development plan (no code yet).
+
+2. Then, break that plan into very small, beginner-friendly tasks (chunks).
+
+3. I want to go one chunk at a time, and I need to understand each part before moving forward — so please don’t provide code yet.
+
+4. When we begin each chunk, follow this format:
+    1. Explain the concept first
+    2. Get confirmation before the code.
+    3. Then show the code
+    4. Then give clear testing instructions
+
+5. Let’s start with the first chunk, and walk through it completely (explanation → code → testing).
+
+6. If there are any issues in testing, help me fix them first, then we’ll move on to the next chunk after it works.
+
+7. Also, please copy all generated or mentioned files into the project knowledge, so you can refer to them in future steps.
+
+
+Once I finish and test one chunk, I’ll come back for the next.
+
+This approach helps me learn practically and build confidently. Let’s begin.
+
+
+Coding Instructions
+
+General Principles
+
+1. Strictly Avoid Public Schema
+   Never use the `public` schema in any part of the application.
+
+2. When in Doubt, Refer First
+   If unsure about any existing code logic or structure, consult the project's GitHub repository or relevant knowledge base documentation before proceeding.
+
+3. Security Comes First
+   Follow industry-standard security best practices at every stage — including input validation, authentication, authorization, database queries, and error handling.
+
+4. Stay Focused
+   If multiple questions or tasks are raised, always stick to the current plan or task unless explicitly told to switch. Avoid deviation.
+
+5. Multi-Tenant Awareness (Very Important)
+    Always remember this is a multi-tenant application.
+    Every new model, migration, and feature must be designed with multi-tenancy in mind.
+    Use the appropriate tenant-based patterns (e.g., schema-based, row-level tenancy) as already followed in the project.
+
+API Standards
+
+6. Consistent API Path Naming
+   All API routes must begin with `/api` (e.g., `/api/users`, `/api/v1/login`).
+Database Configuration
+
+7. Respect Existing Configurations
+   Use the existing database configuration strictly.
+   If any change or update is needed, seek explicit approval before implementation.
+
+. Plan Before Setting Up Anything New
+   For any new module, model, or setup requiring database changes:
+
+   * Do not implement immediately.
+   * Instead, present a clear DB configuration plan for review and approval.
+

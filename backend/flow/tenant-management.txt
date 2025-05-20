@@ -1,0 +1,100 @@
+Full Flow for Multi-Tenant System with Authentication
+
+1. Tenant Creation with Admin User
+
+  Flow:
+    1. Admin/Church representative visits registration page
+    3. They fill out tenant details (church name, country, etc.)
+    4. They also provide admin user details (name, email, password)
+    5. System creates tenant and admin user in one transaction
+    6. System sends verification email to admin user
+    7. Admin verifies email and can now log in
+
+API Endpoint:
+
+POST /api/tenants
+Body: {
+  "tenant": {
+    "churchName": "Example Church",
+    "countryCode": "US",
+    "logoUrl": "https://example.com/logo.png"
+    // Other tenant fields
+  },
+  "adminUser": {
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "admin@example.com",
+    "password": "securePassword123",
+    "phone": "+1234567890"
+  }
+}
+
+2. User Login Flow
+
+  Flow:
+    1. User visits the login page
+    2. User enters email and password
+    3. System finds tenant associated with the email
+    4. System validates credentials for that tenant
+    5. If valid, system creates JWT tokens with tenant and user information
+    6. System returns tokens and tenant information to client
+    7. Client redirects to tenant-specific dashboard
+
+API Endpoint:
+
+POST /api/auth/login
+Body: {
+  "email": "admin@example.com",
+  "password": "securePassword123"
+}
+
+Response: {
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "tenant": {
+    "id": "uuid-here",
+    "slug": "example-church_123456",
+    "churchName": "Example Church"
+  },
+  "user": {
+    "id": "uuid-here",
+    "firstName": "Admin",
+    "lastName": "User",
+    "email": "admin@example.com",
+    "role": "admin"
+  }
+}
+
+3. Admin Creates New Users
+
+  Flow:
+    1. Admin logs in using flow #2
+    2. Admin navigates to user management section
+    3. Admin fills out new user details (name, email, role, etc.)
+    4. System creates user associated with admin's tenant
+    5. System sends invitation/verification email to new user
+    6. New user can set password and log in
+
+API Endpoint:
+
+POST /api/users
+Headers: {
+  "Authorization": "Bearer {accessToken}"
+}
+Body: {
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "phone": "+1987654321",
+  "role": "manager",
+  "sendInvitation": true
+}
+
+Response: {
+  "id": "uuid-here",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@example.com",
+  "role": "manager",
+  "invitationSent": true
+}
