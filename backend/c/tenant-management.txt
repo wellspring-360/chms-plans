@@ -1,0 +1,5 @@
+1) we try to register the tenant wiht multiple Church have same + 6-digit-ID
+    but here issue is while creating some issue in app and it get register in DB level
+    id agent they try to register again, application considered as a register different Church with same name then createnew one with same + 6-digit-ID
+
+    need to fix this
