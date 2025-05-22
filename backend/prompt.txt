@@ -66,7 +66,26 @@ Database Configuration
    * Do not implement immediately.
    * Instead, present a clear DB configuration plan for review and approval.
 
+Logging and Error Handling 
 
-9. log
+9 .proper Logging
+   Implement proper and meaningful logs using the standard logging framework.
+   Logs should include context (e.g., tenant ID, user ID, action) and avoid exposing sensitive information.
+   Ensure log levels (info, warning, error, debug) are used appropriately.
 
-10 error handling
+10 Error Handling
+   Handle errors gracefully.
+   Always catch exceptions where necessary and return consistent, user-friendly error responses.
+   Never expose raw stack traces or internal errors to the end user.
+
+11 Coding Practices
+   Always Follow Best and Standard Practices
+   Maintain clean, readable, and maintainable code.
+   Follow standard design patterns, naming conventions, and modular design principles.
+   Prioritize code reusability, testability, and documentation.
+
+12 Minimal Code Diffs for Existing Files
+   If a change is needed in an existing file, do not rewrite the entire entire code block.
+   Instead, only reference the file path and line/section that needs to be updated, along with the precise modification required.
+   This helps reviewers understand the intent and reduces merge conflict risk.
+
