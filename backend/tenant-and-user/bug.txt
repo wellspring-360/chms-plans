@@ -4,4 +4,4 @@
 
     need to fix this
 
-2) maintain user ip for each user 3
+2) maintain user ID for each user 
