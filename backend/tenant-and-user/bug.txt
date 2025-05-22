@@ -6,4 +6,8 @@
 
 2) maintain user ID for each user 
 
-3) update the tenant name don’t sue _ in tenant name user - in 
+3) update the tenant slug don’t use _ in tenant name use - in for  
+    from example-church_936800 to example-church-936800
+    in db schemas sa well
+
+4) in DB phone number and mail ID should be unique no duplicate
