@@ -60,9 +60,13 @@ Database Configuration
    Use the existing database configuration strictly.
    If any change or update is needed, seek explicit approval before implementation.
 
-. Plan Before Setting Up Anything New
+8. Plan Before Setting Up Anything New
    For any new module, model, or setup requiring database changes:
 
    * Do not implement immediately.
    * Instead, present a clear DB configuration plan for review and approval.
 
+
+9. log
+
+10 error handling

@@ -1,0 +1,2 @@
+1) while registration tenant ask address 
+2) add tenant slug in user table
