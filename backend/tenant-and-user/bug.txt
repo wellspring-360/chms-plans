@@ -11,3 +11,5 @@
     in db schemas sa well
 
 4) in DB phone number and mail ID should be unique no duplicate
+
+5) phone validation based on country
