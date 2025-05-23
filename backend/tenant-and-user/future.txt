@@ -1,4 +1,0 @@
-1) while registration tenant ask address 
-2) add tenant slug in user table
-3) create create api swagger for all APIs  
-4) unable to register the tenant contact the support
