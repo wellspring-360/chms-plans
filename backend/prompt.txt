@@ -1,94 +1,110 @@
-I'm building a SaaS Multi-Tenant Church Management System (for 1,000+ churches) using NestJS for the backend, based on my database configuration.
+# 📘 Claude AI Backend Instructions
 
-I'm new to backend development, so I want to learn by building and testing small chunks step by step, with a strong focus on understanding every concept and best practices.
+Project: SaaS Multi-Tenant Church Management System (NestJS)  
+Goal: Backend built in small, testable, multi-tenant-aware chunks
 
+---
 
-Please help me with the following user things:
+## 🔁 Development Approach (Step-by-Step)
 
-1. Start by giving a high-level backend development plan with beginner-friendly tasks (chunks) (no code yet).
+1. One Chunk at a Time
+   - Break the backend into small, understandable chunks.
+   - Each chunk must include:
+     1. Concept Explanation
+     2. Confirmation Before Code
+     3. Code Implementation (dev/stage/prod config as needed)
+     4. Clear Testing Instructions
+     5. Fix Any Issues First Before Moving On
 
-2. I want to go one chunk at a time, and I need to understand each part before moving forward — so please don’t provide code yet.
+2. Beginner-Friendly Guidance
+   - Every step must be explained in simple terms using best practices.
 
-3. When we begin each chunk, follow this format:
-    1. Explain the concept first
-    2. Get confirmation before the code.
-    3. Then show the code
-    4. Then give clear testing instructions
+3. No Skipping Ahead
+   - Do not provide future chunks or code until current chunk is complete and tested.
 
-4. Let’s start with the first chunk, and walk through it completely (explanation → code → testing).
+---
 
-5. If there are any issues in testing, help me fix them first, then we’ll move on to the next chunk after it works.
+## 🧱 General Development Principles
 
-6. Also, please copy all generated or mentioned files into the project knowledge, so you can refer to them in future steps.
+1. Strictly Avoid `public` Schema
+   - Never use PostgreSQL `public` schema.
+   - Always use per-tenant schemas based on tenant ID or slug.
 
+2. Ask Before Acting
+   - If unsure about existing logic, ask or consult GitHub/documentation before implementing.
 
-Once I finish and test one chunk, I’ll come back for the next.
-
-This approach helps me learn practically and build confidently. Let’s begin.
-
-
-Coding Instructions
-
-General Principles
-
-1. Strictly Avoid Public Schema
-   Never use the `public` schema in any part of the application.
-
-2. When in Doubt, Refer First
-   If unsure about any existing code logic or structure, consult the project's GitHub repository or relevant knowledge base documentation before proceeding.
-
-3. Security Comes First
-   Follow industry-standard security best practices at every stage — including input validation, authentication, authorization, database queries, and error handling.
+3. Security First
+   - Validate inputs
+   - Prevent SQL injection
+   - Protect secrets
+   - Sanitize outputs
+   - Hide internal errors from users
 
 4. Stay Focused
-   If multiple questions or tasks are raised, always stick to the current plan or task unless explicitly told to switch. Avoid deviation.
+   - Stick to the current task.
+   - Do not mix multiple threads or go off-track unless explicitly instructed.
 
-5. Multi-Tenant Awareness (Very Important)
-    Always remember this is a multi-tenant application.
-    Every new model, migration, and feature must be designed with multi-tenancy in mind.
-    Use the appropriate tenant-based patterns (e.g., schema-based, row-level tenancy) as already followed in the project.
+5. Multi-Tenant Aware
+   - All logic must support schema-based tenancy.
+   - Never assume single-tenant access or static schemas.
 
-API Standards
+---
 
-6. Consistent API Path Naming
-   All API routes must begin with `/api` (e.g., `/api/users`, `/api/v1/login`).
+## 🧪 Environment-Specific Code Support
 
-7. Create Swagger for All APIs
-   Every API must be documented using Swagger
-   For every new API or any API enhancement, the corresponding Swagger specification must be updated accordingly.
-   Do not miss any field in the request or response schema — every parameter, header, request body field, and response attribute must be clearly defined and kept in sync with the implementation.
+6. Write for All Environments
+   - Every feature must support:
+     - development
+     - staging
+     - production
+   - Provide copyable `.env` or config files for each.
 
-Database Configuration
+---
 
-8. Respect Existing Configurations
-   Use the existing database configuration strictly.
-   If any change or update is needed, seek explicit approval before implementation.
+## 🧭 API Standards
 
-9. Plan Before Setting Up Anything New
-   For any new module, model, or setup requiring database changes:
+7. Consistent API Paths
+   - All routes must start with `/api`
+     - Example: `/api/users`, `/api/v1/auth/login`
 
-   * Do not implement immediately.
-   * Instead, present a clear DB configuration plan for review and approval.
+8. Swagger Required
+   - Swagger must be kept in sync with all request/response fields.
+   - Required for every API route.
 
-Logging and Error Handling 
+---
 
-10 .proper Logging
-   Implement proper and meaningful logs using the standard logging framework.
-   Logs should include context (e.g., tenant ID, user ID, action) and avoid exposing sensitive information.
-   Ensure log levels (info, warning, error, debug) are used appropriately.
+## 🧩 Database Configuration Rules
 
-11 Error Handling
-   Handle errors gracefully.
-   Always catch exceptions where necessary and return consistent, user-friendly error responses.
-   Never expose raw stack traces or internal errors to the end user.
+9. Respect Existing DB Config
+   - Never change DB setup directly.
+   - First present a DB plan for approval.
+   - Only proceed after approval.
 
-12 Coding Practices
-   Always Follow Best and Standard Practices
-   Maintain clean, readable, and maintainable code.
-   Follow standard design patterns, naming conventions, and modular design principles.
-   Prioritize code reusability, testability, and documentation.
+---
 
-13 Minimal Code Diffs for Existing Files (strictly follow)
-   If a change is needed in an existing file, do not rewrite the entire entire code block.
-   Instead, only reference the file path and line/section that needs to be updated, along with the precise modification required.
-   This helps reviewers understand the intent and reduces merge conflict risk.
+## 🧾 Logging and Error Handling
+
+10. Meaningful Logging
+    - Use standard logging library.
+    - Include: tenant ID, user ID, action name.
+    - Do not log passwords or secrets.
+
+11. Consistent Error Responses
+    - Handle exceptions cleanly.
+    - Send user-friendly messages.
+    - Never expose raw stack traces or system errors to users.
+
+---
+
+## 🧼 Code Quality & Maintenance
+
+12. Follow Best Practices
+    - Clean, modular, and readable NestJS code
+    - Reuse services, DTOs, guards, and utilities
+    - Keep logic testable and well-documented
+
+13. Minimal Diffs in Existing Files
+    - Don’t rewrite whole files.
+    - Show only:
+      - File path
+      - Exact modifications
