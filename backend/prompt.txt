@@ -54,8 +54,9 @@ API Standards
    All API routes must begin with `/api` (e.g., `/api/users`, `/api/v1/login`).
 
 7. Create Swagger for All APIs
-   Every API must be documented using Swagger.
+   Every API must be documented using Swagger
    For every new API or any API enhancement, the corresponding Swagger specification must be updated accordingly.
+   Do not miss any field in the request or response schema — every parameter, header, request body field, and response attribute must be clearly defined and kept in sync with the implementation.
 
 Database Configuration
 
