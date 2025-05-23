@@ -52,13 +52,18 @@ API Standards
 
 6. Consistent API Path Naming
    All API routes must begin with `/api` (e.g., `/api/users`, `/api/v1/login`).
+
+7. Create Swagger for All APIs
+   Every API must be documented using Swagger.
+   For every new API or any API enhancement, the corresponding Swagger specification must be updated accordingly.
+
 Database Configuration
 
-7. Respect Existing Configurations
+8. Respect Existing Configurations
    Use the existing database configuration strictly.
    If any change or update is needed, seek explicit approval before implementation.
 
-8. Plan Before Setting Up Anything New
+9. Plan Before Setting Up Anything New
    For any new module, model, or setup requiring database changes:
 
    * Do not implement immediately.
@@ -66,24 +71,23 @@ Database Configuration
 
 Logging and Error Handling 
 
-9 .proper Logging
+10 .proper Logging
    Implement proper and meaningful logs using the standard logging framework.
    Logs should include context (e.g., tenant ID, user ID, action) and avoid exposing sensitive information.
    Ensure log levels (info, warning, error, debug) are used appropriately.
 
-10 Error Handling
+11 Error Handling
    Handle errors gracefully.
    Always catch exceptions where necessary and return consistent, user-friendly error responses.
    Never expose raw stack traces or internal errors to the end user.
 
-11 Coding Practices
+12 Coding Practices
    Always Follow Best and Standard Practices
    Maintain clean, readable, and maintainable code.
    Follow standard design patterns, naming conventions, and modular design principles.
    Prioritize code reusability, testability, and documentation.
 
-12 Minimal Code Diffs for Existing Files (strictly follow)
+13 Minimal Code Diffs for Existing Files (strictly follow)
    If a change is needed in an existing file, do not rewrite the entire entire code block.
    Instead, only reference the file path and line/section that needs to be updated, along with the precise modification required.
    This helps reviewers understand the intent and reduces merge conflict risk.
-
