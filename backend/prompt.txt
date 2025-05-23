@@ -5,23 +5,21 @@ I'm new to backend development, so I want to learn by building and testing small
 
 Please help me with the following user things:
 
-1. Start by giving a high-level backend development plan (no code yet).
+1. Start by giving a high-level backend development plan with beginner-friendly tasks (chunks) (no code yet).
 
-2. Then, break that plan into very small, beginner-friendly tasks (chunks).
+2. I want to go one chunk at a time, and I need to understand each part before moving forward — so please don’t provide code yet.
 
-3. I want to go one chunk at a time, and I need to understand each part before moving forward — so please don’t provide code yet.
-
-4. When we begin each chunk, follow this format:
+3. When we begin each chunk, follow this format:
     1. Explain the concept first
     2. Get confirmation before the code.
     3. Then show the code
     4. Then give clear testing instructions
 
-5. Let’s start with the first chunk, and walk through it completely (explanation → code → testing).
+4. Let’s start with the first chunk, and walk through it completely (explanation → code → testing).
 
-6. If there are any issues in testing, help me fix them first, then we’ll move on to the next chunk after it works.
+5. If there are any issues in testing, help me fix them first, then we’ll move on to the next chunk after it works.
 
-7. Also, please copy all generated or mentioned files into the project knowledge, so you can refer to them in future steps.
+6. Also, please copy all generated or mentioned files into the project knowledge, so you can refer to them in future steps.
 
 
 Once I finish and test one chunk, I’ll come back for the next.
