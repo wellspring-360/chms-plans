@@ -108,3 +108,27 @@ Goal: Backend built in small, testable, multi-tenant-aware chunks
     - Show only:
       - File path
       - Exact modifications
+
+---
+
+📄 .md Files Configuration
+
+README.md:
+1. Only for high-level overview
+2. About the application
+3. File structure
+
+DB_SETUP.md:
+1. DB config high-level overview
+2. Only for DB setup in local environment (do not include any other setup)
+
+APP_SETUP.md:
+1. App setup config high-level overview
+2. Only for app setup in local environment (do not include any other setup)
+
+APP_FLOW.md:
+1. App flow config high-level overview
+2. App flow referencing only the API paths
+3. Do not include any request body or response details
+
+---
