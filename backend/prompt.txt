@@ -111,24 +111,28 @@ Goal: Backend built in small, testable, multi-tenant-aware chunks
 
 ---
 
-📄 .md Files Configuration
+## 📄 .md Files Configuration
 
 README.md:
-1. Only for high-level overview
-2. About the application
-3. File structure
+1. Provide only a high-level overview.
+2. Include information about the application.
+3. Show the file structure.
+4. Do not include any setup instructions or references to DB_SETUP.md, APP_SETUP.md, or APP_FLOW.md.
+5. Do not include any core endpoints—refer to Swagger for endpoint documentation.
 
 DB_SETUP.md:
-1. DB config high-level overview
-2. Only for DB setup in local environment (do not include any other setup)
+1. Give a high-level overview of the database configuration.
+2. Include only instructions for setting up the database in a local environment.
+3. Do not include any other setup instructions.
 
 APP_SETUP.md:
-1. App setup config high-level overview
-2. Only for app setup in local environment (do not include any other setup)
+1. Give a high-level overview of the application setup configuration.
+2. Include only instructions for setting up the application in a local environment.
+3. Do not include app flow or database setup instructions.
 
 APP_FLOW.md:
-1. App flow config high-level overview
-2. App flow referencing only the API paths
-3. Do not include any request body or response details
+1. Provide a high-level overview of the application flow.
+2. Reference only the API paths.
+3. Do not include any request body or response details.
 
 ---
