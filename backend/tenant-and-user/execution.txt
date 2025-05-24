@@ -10,6 +10,7 @@ Development Progress
 - NestJS project initialized with dependencies
 - Environment configuration set up
 - Basic project structure established
+- Swagger documentation configured
 
 2. Database Connection (COMPLETED)
 - PostgreSQL connection configured
@@ -20,6 +21,8 @@ Development Progress
 - Tenant entity with all required fields
 - Tenant service with CRUD operations
 - Duplicate prevention logic implemented
+- Duplicate prevention logic implemented (name + country + pincode)
+- Address field mandatory for all tenants
 
 4. Tenant Management - Part 2 (COMPLETED)
 - Multi-tenant schema isolation configured
@@ -43,13 +46,27 @@ Development Progress
 - Email verification endpoints
 - Password reset functionality
 
-8. Subscription Management (NOT STARTED)
-- Subscription plans implementation
-- Payment integration
-- Subscription lifecycle management
+8. Mobile Verification (NOT STARTED)
+- SMS service integration
+- Mobile verification endpoints
+- Country-based mobile validation
+
+9. SuperAdminUser Implementation (NOT STARTED)
+- Implement superadmin role (first user during tenant registration)
+- Restrict user creation to superadmin only
+- Update permission checks
+- Allow superadmin to create admin users for tenant management
+
+10. Subscription Management (NOT STARTED)
+ - Subscription plans implementation
+ - Payment integration
+ - Subscription lifecycle management
+ - Plan expiry notifications
+
 
 Next Steps
-1. Complete email verification endpoints
-2. Implement password reset functionality
-3. Consider adding email service integration (SendGrid/AWS SES)
-4. Move to Subscription Management or other priority features
+1. Implement SuperAdminUser role during tenant registration
+2. Add user_id field for cross-tenant identification
+3. Implement country-based validations for mobile and addres
+4. Implement mobile verification system
+5. Add subscription management with expiry notifications

@@ -2,7 +2,7 @@
 
 Project: SaaS Multi-Tenant Church Management System (NestJS)  
 Goal: Backend built in small, testable, multi-tenant-aware chunks
-code:    This is STRICTLY required for all code suggestions and changes. Always provide only the minimal necessary diff, never the entire file content.
+code: This is STRICTLY required for all code suggestions and changes. Always provide only the minimal necessary diff, never write the full content again.
 ---
 
 ## 🔁 Development Approach (Step-by-Step)
@@ -108,7 +108,7 @@ code:    This is STRICTLY required for all code suggestions and changes. Always 
     - Show only:
       - File path
       - Exact modifications
-   This is STRICTLY required for all code suggestions and changes. Always provide only the minimal necessary diff, never the entire file content.
+   This is STRICTLY required for all code suggestions and changes. Always provide only the minimal necessary diff, never write the full content again.
 
 ---
 

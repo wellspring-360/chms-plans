@@ -4,28 +4,33 @@ Full Flow for Multi-Tenant System with Authentication
 
   Flow:
     1. Admin/Church representative visits registration page
-    3. They fill out tenant details (church name, country, etc.)
-    4. They also provide admin user details (name, email, password)
-    5. System creates tenant and admin user in one transaction
-    6. System sends verification email to admin user
-    7. Admin verifies email and can now log in
+    2. They fill out tenant details (church name, country, address, pincode)
+    3. They also provide admin user details (name, email, mobile, password)
+    4. System validates address format based on country
+    5. System validates mobile number format based on country
+    6. System creates tenant and SuperAdminUser in one transaction
+    7. System sends verification email and SMS to SuperAdminUser
+    8. SuperAdminUser verifies email and mobile
+    9. SuperAdminUser can now log in with full permissions
 
 API Endpoint:
 
-POST /api/tenants
+POST /api/auth/register-tenant
 Body: {
   "tenant": {
     "churchName": "Example Church",
     "countryCode": "US",
+    "address": "123 Church Street, Springfield, IL 62701",
+    "pincode": "62701",
     "logoUrl": "https://example.com/logo.png"
-    // Other tenant fields
+
   },
-  "adminUser": {
+  "superAdminUser": {
     "firstName": "Admin",
     "lastName": "User",
     "email": "admin@example.com",
     "password": "securePassword123",
-    "phone": "+1234567890"
+    "phone": "+1234567890"  // Must be unique across all tenants
   }
 }
 
@@ -61,16 +66,17 @@ Response: {
     "firstName": "Admin",
     "lastName": "User",
     "email": "admin@example.com",
-    "role": "admin"
+    "role": "superadmin",  // First user is always superadmin
+    "userId": "USR123456"  // Unique across all tenants
   }
 }
 
-3. Admin Creates New Users
+3. SuperAdminUser Creates New Users (Only SuperAdminUser can create users)
 
   Flow:
-    1. Admin logs in using flow #2
-    2. Admin navigates to user management section
-    3. Admin fills out new user details (name, email, role, etc.)
+    1. SuperAdminUser logs in using flow #2
+    2. SuperAdminUser navigates to user management section
+    3. SuperAdminUser fills out new user details (name, email, role, etc.)
     4. System creates user associated with admin's tenant
     5. System sends invitation/verification email to new user
     6. New user can set password and log in
@@ -86,7 +92,7 @@ Body: {
   "lastName": "Doe",
   "email": "john.doe@example.com",
   "phone": "+1987654321",
-  "role": "manager",
+  "role": "pastor",
   "sendInvitation": true
 }
 
@@ -95,6 +101,8 @@ Response: {
   "firstName": "John",
   "lastName": "Doe",
   "email": "john.doe@example.com",
-  "role": "manager",
+  "phone": "+1987654321",
+  "userId": "USR789012",  // System-generated unique ID
+  "role": "pastor",
   "invitationSent": true
 }

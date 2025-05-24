@@ -3,12 +3,17 @@ System Overview
 SaaS Multi-Tenant Church Management System (1,000+ Churches)
 
 1. Database: PostgreSQL with one schema per tenant (no use of `public` schema).
-2. Tenant URL Format: `app.com/{church_name}_{6-digit-ID}` — Globally unique using church name + 6-digit ID.
+2. Tenant URL Format: `app.com/{church_slug}` — Format: church-name-{6-digit-ID} — Globally unique using church name + 6-digit ID.
 3. Tenant Detection: Identify tenant via URL slug and user context.
 4. Verification: Email and mobile verification required.
 5. Reminders: Plan expiry notifications sent in advance.
-6. Localization: Mobile number format, Time Zone and currency based on selected country.
+6. Localization: Mobile number format, address format, time zone, and currency based on selected country.
 7. Backend: NestJS
+8. SuperAdminUser: First user created during tenant registration with full control.
+9. Unique Constraints: Email and mobile must be unique across all tenants.
+10. User Identification: Each user has a unique user_id for cross-tenant identification.
+11. Validation: Mobile number and address format validated based on country.
+12. SuperAdminUser: Has full control over tenant operations including user management, can create other admin users who can manage tenant operations.
 
 Complete Schema Setup or tenant and user management 
 
@@ -94,7 +99,8 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.users (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     email TEXT NOT NULL,
-    phone TEXT,
+    phone TEXT UNIQUE,  
+    user_id TEXT UNIQUE NOT NULL, 
     
     -- Authentication
     password_hash TEXT NOT NULL,
@@ -107,7 +113,11 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.users (
     -- Verification tokens
     verification_token TEXT,
     verification_token_expires_at TIMESTAMP,
-    
+
+    -- Mobile verification
+    mobile_verification_code TEXT,
+    mobile_verification_expires_at TIMESTAMP,
+
     -- Password reset
     password_reset_token TEXT,
     password_reset_expires_at TIMESTAMP,
@@ -121,7 +131,8 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.users (
     last_login_at TIMESTAMP,
     
     -- Constraints
-    UNIQUE(tenant_id, email)
+    UNIQUE(tenant_id, email),
+    CHECK (role IN ('superadmin', 'admin', 'pastor', 'user'))
 );
 
 Users table columns
@@ -156,6 +167,8 @@ CREATE INDEX IF NOT EXISTS idx_users_role ON tenants_metadata.users (role);
 CREATE INDEX IF NOT EXISTS idx_users_verification_status ON tenants_metadata.users (email_verified, phone_verified);
 CREATE INDEX IF NOT EXISTS idx_users_is_active ON tenants_metadata.users (is_active);
 CREATE INDEX IF NOT EXISTS idx_users_tenant_slug ON tenants_metadata.users (tenant_slug);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON tenants_metadata.users (phone) WHERE phone IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_users_user_id ON tenants_metadata.users (user_id);
 
 =================================================================
 AUTHENTICATION
