@@ -2,7 +2,7 @@
 
 Project: SaaS Multi-Tenant Church Management System (NestJS)  
 Goal: Backend built in small, testable, multi-tenant-aware chunks
-
+code:    This is STRICTLY required for all code suggestions and changes. Always provide only the minimal necessary diff, never the entire file content.
 ---
 
 ## 🔁 Development Approach (Step-by-Step)
@@ -108,6 +108,7 @@ Goal: Backend built in small, testable, multi-tenant-aware chunks
     - Show only:
       - File path
       - Exact modifications
+   This is STRICTLY required for all code suggestions and changes. Always provide only the minimal necessary diff, never the entire file content.
 
 ---
 
