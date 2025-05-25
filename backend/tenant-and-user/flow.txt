@@ -8,10 +8,10 @@ Full Flow for Multi-Tenant System with Authentication
     3. They also provide admin user details (name, email, mobile, password)
     4. System validates address format based on country
     5. System validates mobile number format based on country
-    6. System creates tenant and SuperAdminUser in one transaction
-    7. System sends verification email and SMS to SuperAdminUser
-    8. SuperAdminUser verifies email and mobile
-    9. SuperAdminUser can now log in with full permissions
+    6. System creates tenant and TenantAdminUser in one transaction
+    7. System sends verification email and SMS to TenantAdminUser
+    8. TenantAdminUser verifies email and mobile
+    9. TenantAdminUser can now log in with full permissions
 
 API Endpoint:
 
@@ -25,7 +25,7 @@ Body: {
     "logoUrl": "https://example.com/logo.png"
 
   },
-  "superAdminUser": {
+  "tenantAdminUser": {
     "firstName": "Admin",
     "lastName": "User",
     "email": "admin@example.com",
@@ -66,17 +66,17 @@ Response: {
     "firstName": "Admin",
     "lastName": "User",
     "email": "admin@example.com",
-    "role": "superadmin",  // First user is always superadmin
+    "role": "tenantadmin",  // First user is always tenantadmin
     "userId": "USR123456"  // Unique across all tenants
   }
 }
 
-3. SuperAdminUser Creates New Users (Only SuperAdminUser can create users)
+3. TenantAdminUser Creates New Users (Only TenantAdminUser can create users)
 
   Flow:
-    1. SuperAdminUser logs in using flow #2
-    2. SuperAdminUser navigates to user management section
-    3. SuperAdminUser fills out new user details (name, email, role, etc.)
+    1. TenantAdminUser logs in using flow #2
+    2. TenantAdminUser navigates to user management section
+    3. TenantAdminUser fills out new user details (name, email, role, etc.)
     4. System creates user associated with admin's tenant
     5. System sends invitation/verification email to new user
     6. New user can set password and log in

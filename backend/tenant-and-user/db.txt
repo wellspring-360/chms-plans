@@ -9,11 +9,11 @@ SaaS Multi-Tenant Church Management System (1,000+ Churches)
 5. Reminders: Plan expiry notifications sent in advance.
 6. Localization: Mobile number format, address format, time zone, and currency based on selected country.
 7. Backend: NestJS
-8. SuperAdminUser: First user created during tenant registration with full control.
+8. TenantAdminUser: First user created during tenant registration with full control.
 9. Unique Constraints: Email and mobile must be unique across all tenants.
 10. User Identification: Each user has a unique user_id for cross-tenant identification.
 11. Validation: Mobile number and address format validated based on country.
-12. SuperAdminUser: Has full control over tenant operations including user management, can create other admin users who can manage tenant operations.
+12. TenantAdminUser: Has full control over tenant operations including user management, can create other admin users who can manage tenant operations.
 
 Complete Schema Setup or tenant and user management 
 
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.users (
     
     -- Constraints
     UNIQUE(tenant_id, email),
-    CHECK (role IN ('superadmin', 'admin', 'pastor', 'user'))
+    CHECK (role IN ('tenantadmin', 'admin', 'pastor', 'user'))
 );
 
 Users table columns
@@ -146,13 +146,16 @@ Users table columns
 | first_name                    | TEXT      | NOT NULL                                          | First name                                       |
 | last_name                     | TEXT      | NOT NULL                                          | Last name                                        |
 | email                         | TEXT      | NOT NULL                                          | Login email                                      |
-| phone                         | TEXT      | NULLABLE                                          | Phone number                                     |
+| phone                         | TEXT      | UNIQUE                                            | Phone number                                     |
+| user_id                       | TEXT      | UNIQUE, NOT NULL                                  | Unique user identifier across tenants            |
 | password_hash                 | TEXT      | NOT NULL                                          | Bcrypt password hash                             |
-| role                          | TEXT      | DEFAULT 'user'                                    | User role (admin, pastor, user, etc.)            |
+| role                          | TEXT      | DEFAULT 'user', CHECK IN roles                    | Role (superadmin,tenantadmin,admin,pastor,user)  |
 | email_verified                | BOOLEAN   | NOT NULL, DEFAULT false                           | Email verification status                        |
 | phone_verified                | BOOLEAN   | NOT NULL, DEFAULT false                           | Phone verification status                        |
 | verification_token            | TEXT      | NULLABLE                                          | Token for email/phone verification               |
 | verification_token_expires_at | TIMESTAMP | NULLABLE                                          | Expiration time for verification token           |
+| mobile_verification_code      | TEXT      | NULLABLE                                          | Code for mobile verification                     |
+| mobile_verification_expires_at| TIMESTAMP | NULLABLE                                          | Expiration time for mobile verification          |
 | password_reset_token          | TEXT      | NULLABLE                                          | Token for password reset                         |
 | password_reset_expires_at     | TIMESTAMP | NULLABLE                                          | Expiration time for password reset token         |
 | failed_login_attempts         | INTEGER   | DEFAULT 0                                         | Count of failed login attempts                   |
