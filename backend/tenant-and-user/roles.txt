@@ -1,0 +1,15 @@
+Role Hierarchy:
+
+1) tenantadmin 
+    * Full access to all tenant operations
+    * tenant operations and management
+    * full user management
+2) admin 
+    * only inside tenant operations
+    * not any user management
+3) pastor
+    * will plan later
+4) leader
+    * will plan later
+4) user 
+    * will plan later
