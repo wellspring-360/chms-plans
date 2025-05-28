@@ -1,119 +1,419 @@
-Full Flow for Multi-Tenant System with Authentication
+Complete Flow for Multi-Tenant Church Management System
 
-CURRENT IMPLEMENTATION STATUS: ✅ FULLY FUNCTIONAL
+CURRENT IMPLEMENTATION STATUS: ✅ FULLY FUNCTIONAL WITH ADVANCED FEATURES
 
 =================================================================
-1. Tenant Creation with Admin User (IMPLEMENTED ✅)
+1. Enhanced Tenant Registration with Admin User (IMPLEMENTED ✅)
 =================================================================
 
 Flow:
-    1. Admin/Church representative visits registration page
-    2. They fill out tenant details with structured address:
+    1. Church representative visits registration page
+    2. They provide comprehensive tenant details:
        - Church name
-       - Complete address (address_line1, address_line2, city, state, postal_code, country)
-       - Optional: currency code, timezone, logo URL
-    3. They provide admin user details (name, email, phone, password)
-    4. System validates structured address format based on country
-    5. System validates phone number format and country matching
-    6. System auto-detects currency and timezone from country if not provided
-    7. System creates tenant and TenantAdminUser in single transaction
-    8. System generates unique 6-digit church ID and URL-friendly slug
-    9. System creates dedicated database schema with hyphen support
-    10. System uploads logo to S3 if provided (local file or URL)
-    11. System sends professional verification email to TenantAdminUser
-    12. TenantAdminUser verifies email (required for tenant admin access)
-    13. TenantAdminUser can now log in with full permissions
+       - Structured address (JSONB format):
+         * address_line1: "Plot 12, 2nd Street"
+         * address_line2: "Anna Nagar" (optional)
+         * city: "Chennai"
+         * state: "Tamil Nadu" 
+         * postal_code: "600040"
+         * country: "IN" (ISO 3166-1 alpha-2)
+         * latitude/longitude (optional)
+       - Optional: currency code, timezone, logo file/URL
+    3. They provide tenant admin user details:
+       - Name, email, structured phone (JSONB), password
+       - Phone format: { phone_country_code: "+91", phone_number: "9876543210" }
+    4. System performs comprehensive validation:
+       - Address validation against country-specific patterns
+       - Phone number validation with country matching using libphonenumber-js
+       - Global email uniqueness check across ALL tenants
+       - Global phone uniqueness check across ALL tenants
+       - Duplicate church prevention (name + country + postal_code)
+    5. System auto-detects localization:
+       - Currency from country using iso-country-currency
+       - Timezone from country mapping
+    6. System creates tenant with unique identifiers:
+       - 6-digit church ID (100000-999999)
+       - URL-friendly slug (church-name-123456)
+       - Schema name with hyphens (tenant-church-name-123456)
+    7. System creates dedicated PostgreSQL schema with quoted identifiers
+    8. System uploads logo to AWS S3 (if provided) in tenant-specific folders
+    9. System creates TenantAdminUser with:
+       - Sequential user_id (01, 02, 03...9999 globally unique)
+       - Role: 'tenantadmin'
+       - Email verification required (24-hour token)
+       - Professional verification email sent via SMTP
+    10. Transaction rollback on any failure ensures data consistency
+    11. TenantAdminUser must verify email before accessing system
 
 API Endpoint:
 
 POST /api/auth/register-tenant
 Body: {
   "tenant": {
-    "churchName": "Example Church",
-    "countryCode": "US",
-    "address": "123 Church Street, Springfield, IL 62701",
-    "pincode": "62701",
-    "logoUrl": "https://example.com/logo.png"
-
+    "churchName": "Grace Community Church", 
+    "address": {
+      "address_line1": "Plot 12, 2nd Street",
+      "address_line2": "Anna Nagar",
+      "city": "Chennai", 
+      "state": "Tamil Nadu",
+      "postal_code": "600040",
+      "country": "IN"
+    },
+    "logoUrl": "./logo.png"  // Optional, uploads to S3
   },
   "tenantAdminUser": {
-    "firstName": "Admin",
-    "lastName": "User",
-    "email": "admin@example.com",
-    "password": "securePassword123",
-    "phone": "+1234567890"  // Must be unique across all tenants
+    "firstName": "John",
+    "lastName": "Pastor", 
+    "email": "pastor@gracechurch.com",
+    "phone": {
+      "phone_country_code": "+91",
+      "phone_number": "9876543210"
+    },
+    "password": "securePassword123"
   }
 }
 
-2. User Login Flow
+Response: {
+  "tenant": {
+    "id": "uuid-here",
+    "churchId": "123456",
+    "churchName": "Grace Community Church",
+    "slug": "grace-community-church-123456", 
+    "schemaName": "tenant-grace-community-church-123456",
+    "address": { /* structured JSONB */ },
+    "currencyCode": "INR", // Auto-detected
+    "timezone": "Asia/Kolkata", // Auto-detected
+    "logoUrl": "https://bucket.s3.region.amazonaws.com/tenants/grace-community-church-123456/logos/logo-uuid.png",
+    "isActive": true
+  },
+  "tenantAdminUser": {
+    "id": "uuid-here",
+    "userId": "01", // Sequential global ID
+    "firstName": "John",
+    "lastName": "Pastor",
+    "email": "pastor@gracechurch.com", 
+    "phone": { "phone_country_code": "+91", "phone_number": "9876543210" },
+    "role": "tenantadmin",
+    "emailVerified": false, // Must verify before access
+    "isActive": true
+  }
+}
 
-  Flow:
-    1. User visits the login page
-    2. User enters email and password
-    3. System finds tenant associated with the email
-    4. System validates credentials for that tenant
-    5. If valid, system creates JWT tokens with tenant and user information
-    6. System returns tokens and tenant information to client
-    7. Client redirects to tenant-specific dashboard
+=================================================================
+2. Enhanced User Authentication with Real-time Validation (IMPLEMENTED ✅)
+=================================================================
+
+Flow:
+    1. User enters email and password
+    2. System finds user across all tenants with tenant relationship
+    3. System performs multi-layer validation:
+       - User account active status check
+       - Tenant account active status check  
+       - Password verification with bcrypt
+       - Account lock status check (5 failed attempts = 30min lock)
+       - Email verification check for tenant admins
+    4. System tracks login attempts and implements security measures
+    5. System generates enhanced JWT tokens with:
+       - User ID, email, tenant ID, role, tenant slug
+       - Login timestamp for session tracking
+       - Real-time validation metadata
+    6. System updates last login timestamp
+    7. System returns comprehensive user and tenant information
 
 API Endpoint:
 
 POST /api/auth/login
 Body: {
-  "email": "admin@example.com",
+  "email": "pastor@gracechurch.com",
   "password": "securePassword123"
 }
 
 Response: {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "tenant": {
-    "id": "uuid-here",
-    "slug": "example-church_123456",
-    "churchName": "Example Church"
-  },
   "user": {
     "id": "uuid-here",
-    "firstName": "Admin",
-    "lastName": "User",
-    "email": "admin@example.com",
-    "role": "tenantadmin",  // First user is always tenantadmin
-    "userId": "USR123456"  // Unique across all tenants
+    "firstName": "John", 
+    "lastName": "Pastor",
+    "email": "pastor@gracechurch.com",
+    "role": "tenantadmin",
+    "isActive": true,
+    "lastLoginAt": "2025-05-28T10:30:00.000Z"
+  },
+  "tenant": {
+    "id": "uuid-here",
+    "slug": "grace-community-church-123456",
+    "churchName": "Grace Community Church", 
+    "isActive": true
   }
 }
 
-3. TenantAdminUser Creates New Users (Only TenantAdminUser can create users)
+=================================================================
+3. Advanced User Management by TenantAdmin (IMPLEMENTED ✅)
+=================================================================
 
-  Flow:
-    1. TenantAdminUser logs in using flow #2
-    2. TenantAdminUser navigates to user management section
-    3. TenantAdminUser fills out new user details (name, email, role, etc.)
-    4. System creates user associated with admin's tenant
-    5. System sends invitation/verification email to new user
-    6. New user can set password and log in
+Flow:
+    1. TenantAdmin logs in and accesses user management
+    2. TenantAdmin can perform comprehensive user operations:
+       - Create users (with phone/address validation)
+       - Update user information
+       - Activate/deactivate users (soft state management)
+       - Delete users (requires deactivation first for safety)
+       - View user status summaries and analytics
+    3. System enforces strict role-based access control
+    4. All operations are tenant-scoped with validation
+    5. Sequential user IDs assigned (01, 02, 03...9999)
+    6. Non-admin users auto-verified (no email verification needed)
+    7. Real-time status tracking and management
 
-API Endpoint:
+User Creation API:
 
-POST /api/users
-Headers: {
-  "Authorization": "Bearer {accessToken}"
-}
+POST /api/{tenantSlug}/users
+Headers: { "Authorization": "Bearer {accessToken}" }
 Body: {
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "phone": "+1987654321",
-  "role": "pastor",
-  "sendInvitation": true
+  "firstName": "Jane",
+  "lastName": "Smith", 
+  "email": "jane.smith@gracechurch.com",
+  "phone": {
+    "phone_country_code": "+91", 
+    "phone_number": "9876543211"
+  },
+  "password": "securePassword456",
+  "role": "pastor"
 }
 
 Response: {
   "id": "uuid-here",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "phone": "+1987654321",
-  "userId": "USR789012",  // System-generated unique ID
+  "userId": "02", // Sequential ID
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@gracechurch.com", 
+  "phone": { "phone_country_code": "+91", "phone_number": "9876543211" },
   "role": "pastor",
-  "invitationSent": true
+  "tenantId": "uuid-here",
+  "tenantSlug": "grace-community-church-123456",
+  "isActive": true,
+  "emailVerified": true, // Auto-verified for non-admins
+  "phoneVerified": false
 }
+
+User Management APIs:
+
+GET /api/{tenantSlug}/users - List all users (active + inactive)
+GET /api/{tenantSlug}/users/{id} - Get user details  
+PATCH /api/{tenantSlug}/users/{id} - Update user information
+POST /api/{tenantSlug}/users/{id}/activate - Activate user
+POST /api/{tenantSlug}/users/{id}/deactivate - Deactivate user
+DELETE /api/{tenantSlug}/users/{id} - Delete user (requires deactivation first)
+
+=================================================================
+4. Email Verification and Password Reset System (IMPLEMENTED ✅)
+=================================================================
+
+Email Verification Flow:
+    1. Tenant admin registers → verification email sent automatically
+    2. Professional HTML email with WellSpring360 branding sent via SMTP
+    3. Email contains secure UUID token (24-hour expiry)
+    4. User clicks verification link
+    5. System validates token and marks email as verified
+    6. Tenant admin can now access full system functionality
+
+Password Reset Flow:
+    1. User requests password reset via email
+    2. System finds user and generates secure reset token (1-hour expiry)
+    3. Professional password reset email sent with branded template
+    4. User clicks reset link and provides new password
+    5. System validates token, updates password, clears failed login attempts
+
+API Endpoints:
+
+POST /api/auth/verify-email/{token} - Verify email address
+POST /api/auth/resend-verification - Resend verification email
+POST /api/auth/forgot-password - Request password reset
+POST /api/auth/reset-password - Complete password reset
+
+=================================================================
+5. Logo and File Management System (IMPLEMENTED ✅)
+=================================================================
+
+Flow:
+    1. TenantAdmin uploads logo via multipart/form-data
+    2. System validates file (max 5MB, JPG/PNG/GIF/WebP only)
+    3. System uploads to AWS S3 in tenant-specific folder structure:
+       - s3://bucket/tenants/{tenant-slug}/logos/{unique-filename}
+    4. System generates secure S3 URLs with caching headers
+    5. System updates tenant record with logo URL
+    6. Old logos automatically cleaned up on replacement
+
+API Endpoints:
+
+POST /api/tenants/{tenantSlug}/logo - Upload/replace logo
+DELETE /api/tenants/{tenantSlug}/logo - Delete current logo
+
+=================================================================
+6. JWT Token Management with Real-time Validation (IMPLEMENTED ✅)
+=================================================================
+
+Enhanced JWT Strategy:
+    1. Every protected request validates:
+       - Token signature and expiration
+       - User active status (real-time check)
+       - Tenant active status (real-time check)
+       - User-tenant relationship integrity
+       - Account lock status
+       - Email verification for tenant admins
+    2. Token refresh includes updated user/tenant status
+    3. Automatic session invalidation on status changes
+    4. Enhanced payload with login timestamp and metadata
+
+API Endpoints:
+
+POST /api/auth/refresh - Refresh expired tokens
+GET /api/auth/tenant-by-email - Find user's tenant for login
+
+=================================================================
+7. Comprehensive Data Validation System (IMPLEMENTED ✅)
+=================================================================
+
+Address Validation:
+    - Country-specific postal code patterns (US, CA, GB, AU, IN, DE, FR, JP, BR)
+    - Structured JSONB storage with validation
+    - Geographic coordinate support (optional)
+
+Phone Validation:
+    - libphonenumber-js integration for international validation
+    - Country code matching with tenant country
+    - Global uniqueness enforcement across all tenants
+    - E.164 format storage
+
+Email Validation:
+    - Format validation with class-validator
+    - Uniqueness within tenant scope
+    - Global uniqueness check during registration
+
+=================================================================
+8. Multi-Tenant URL Structure and Routing (IMPLEMENTED ✅)
+=================================================================
+
+URL Patterns:
+    - Tenant-specific: /api/{tenant-slug}/resource
+    - System-level: /api/auth/*, /api/tenants/*, /api/health
+    - Logo management: /api/tenants/{tenant-slug}/logo
+
+Tenant Context Middleware:
+    - Automatic tenant resolution from URL
+    - Tenant existence and status validation
+    - Request context injection
+    - Skip logic for public endpoints
+
+=================================================================
+9. Professional Email Communication System (IMPLEMENTED ✅)
+=================================================================
+
+Email Features:
+    - SMTP integration with NodeMailer (Gmail/custom servers)
+    - Professional HTML templates with WellSpring360 branding
+    - Responsive design with gradients and animations
+    - Variable interpolation system
+    - Fallback plain text versions
+    - Development console logging mode
+
+Template Types:
+    - Welcome/verification emails (24-hour expiry)
+    - Password reset emails (1-hour expiry)
+    - Security notifications
+    - Account status changes
+
+=================================================================
+10. Security and Error Handling (IMPLEMENTED ✅)
+=================================================================
+
+Security Features:
+    - Failed login attempt tracking (5 attempts = 30min lock)
+    - Account locking with automatic unlock
+    - Password hashing with bcrypt and salt
+    - JWT token validation with real-time status checks
+    - Input validation and sanitization
+    - SQL injection prevention with TypeORM
+    - CORS and security headers
+
+Error Handling:
+    - Global exception filters
+    - User-friendly error messages
+    - Comprehensive API response schemas
+    - Transaction rollback on failures
+    - Detailed logging for debugging
+
+=================================================================
+11. Database Architecture and Performance (IMPLEMENTED ✅)
+=================================================================
+
+Multi-Tenant Schema Design:
+    - tenants_metadata schema for global data
+    - Individual schemas per tenant (tenant-church-name-123456)
+    - Complete data isolation between tenants
+    - Optimized indexing strategy
+
+Performance Features:
+    - Database connection pooling
+    - Query optimization with proper indexes
+    - JSONB indexing for address and phone data
+    - Efficient pagination and filtering
+    - Schema-based tenant isolation
+
+=================================================================
+12. API Documentation and Development Tools (IMPLEMENTED ✅)
+=================================================================
+
+Swagger Integration:
+    - Comprehensive API documentation at /api/docs
+    - Interactive testing interface
+    - Request/response examples
+    - Error response schemas
+    - Authentication documentation
+    - Multi-tenant URL structure documentation
+
+Development Features:
+    - TypeScript with strict configuration
+    - ESLint and Prettier integration
+    - Environment-based configuration
+    - CLI commands for database operations
+    - Hot reload in development
+
+=================================================================
+CURRENT SYSTEM CAPABILITIES SUMMARY
+=================================================================
+
+✅ FULLY IMPLEMENTED FEATURES:
+- Multi-tenant architecture with complete data isolation
+- Advanced user management with role-based access control
+- Comprehensive authentication with real-time validation
+- Professional email system with branded templates
+- File management with AWS S3 integration
+- Advanced data validation (address, phone, email)
+- Security features (account locking, JWT validation)
+- Professional API documentation
+- Database management and CLI tools
+- Error handling and logging
+- Development and production configurations
+
+🔄 WORKFLOW CAPABILITIES:
+- Complete tenant onboarding process
+- User lifecycle management (create, activate, deactivate, delete)
+- Authentication with security measures
+- Email verification and password reset
+- Logo and file management
+- Real-time status tracking and validation
+- Comprehensive API access with documentation
+
+🎯 PRODUCTION READY FEATURES:
+- Transaction safety with rollback capabilities
+- Global uniqueness constraints (email, phone, church ID)
+- Professional email templates and SMTP integration
+- AWS S3 integration for file storage
+- Comprehensive error handling and validation
+- Security best practices implementation
+- Scalable multi-tenant database architecture
+- Performance optimization with proper indexing
+
+The system is a complete, production-ready multi-tenant Church Management System with advanced features for user management, authentication, communication, and file handling.
