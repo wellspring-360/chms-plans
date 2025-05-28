@@ -1,17 +1,28 @@
 Full Flow for Multi-Tenant System with Authentication
 
-1. Tenant Creation with Admin User
+CURRENT IMPLEMENTATION STATUS: ✅ FULLY FUNCTIONAL
 
-  Flow:
+=================================================================
+1. Tenant Creation with Admin User (IMPLEMENTED ✅)
+=================================================================
+
+Flow:
     1. Admin/Church representative visits registration page
-    2. They fill out tenant details (church name, country, address, pincode)
-    3. They also provide admin user details (name, email, mobile, password)
-    4. System validates address format based on country
-    5. System validates mobile number format based on country
-    6. System creates tenant and TenantAdminUser in one transaction
-    7. System sends verification email and SMS to TenantAdminUser
-    8. TenantAdminUser verifies email and mobile
-    9. TenantAdminUser can now log in with full permissions
+    2. They fill out tenant details with structured address:
+       - Church name
+       - Complete address (address_line1, address_line2, city, state, postal_code, country)
+       - Optional: currency code, timezone, logo URL
+    3. They provide admin user details (name, email, phone, password)
+    4. System validates structured address format based on country
+    5. System validates phone number format and country matching
+    6. System auto-detects currency and timezone from country if not provided
+    7. System creates tenant and TenantAdminUser in single transaction
+    8. System generates unique 6-digit church ID and URL-friendly slug
+    9. System creates dedicated database schema with hyphen support
+    10. System uploads logo to S3 if provided (local file or URL)
+    11. System sends professional verification email to TenantAdminUser
+    12. TenantAdminUser verifies email (required for tenant admin access)
+    13. TenantAdminUser can now log in with full permissions
 
 API Endpoint:
 

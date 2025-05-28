@@ -10,13 +10,12 @@ SaaS Multi-Tenant Church Management System (1,000+ Churches)
 6. Localization: Mobile number format, address format, time zone, and currency based on selected country.
 7. Backend: NestJS
 8. TenantAdminUser: First user created during tenant registration with full control.
-9. Unique Constraints: Email and mobile must be unique across all tenants.
-10. User Identification: Each user has a unique user_id for cross-tenant identification.
-11. Validation: Mobile number and address format validated based on country.
+9. Unique Constraints: Email unique within tenant, phone number unique globally across all tenants.
+10. User Identification: Each user has a unique sequential user_id for cross-tenant identification (format: 01, 02, 03... 9999).
+11. Validation: Mobile number and address format validated based on country using libphonenumber-js.
 12. TenantAdminUser: Has full control over tenant operations including user management, can create other admin users who can manage tenant operations.
 
-Complete Schema Setup or tenant and user management 
-
+Complete Schema Setup for tenant and user management 
 
 =================================================================
 INITIAL SETUP
@@ -29,7 +28,7 @@ CREATE SCHEMA IF NOT EXISTS tenants_metadata;
 TENANT MANAGEMENT
 =================================================================
 
--- Tenants table
+-- Tenants table (UPDATED WITH STRUCTURED ADDRESS)
 CREATE TABLE IF NOT EXISTS tenants_metadata.tenants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP NOT NULL DEFAULT now(),
@@ -41,10 +40,10 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.tenants (
     slug TEXT UNIQUE NOT NULL,
     schema_name TEXT UNIQUE NOT NULL,
     
+    -- Structured Address (JSONB)
+    address JSONB NOT NULL,
+    
     -- Localization
-    country_code TEXT NOT NULL,
-    address TEXT NOT NULL,
-    pincode TEXT NOT NULL,
     currency_code TEXT NOT NULL,
     timezone TEXT NOT NULL,
     
@@ -55,7 +54,7 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.tenants (
     is_active BOOLEAN NOT NULL DEFAULT true
 );
 
-Tenants table columns
+Tenants table columns (UPDATED)
 | Column Name   | Data Type | Constraints                            | Description                                        |
 | ------------- | --------- | -------------------------------------- | -------------------------------------------------- |
 | id            | UUID      | PRIMARY KEY, DEFAULT gen_random_uuid() | Internal unique tenant ID                          |
@@ -65,27 +64,37 @@ Tenants table columns
 | church_name   | TEXT      | NOT NULL                               | Church name (non-unique)                           |
 | slug          | TEXT      | UNIQUE, NOT NULL                       | Globally unique slug (e.g., church-name-392018)    |
 | schema_name   | TEXT      | UNIQUE, NOT NULL                       | Schema name (e.g., tenant-church-name-392018)      |
-| country_code  | TEXT      | NOT NULL                               | ISO 3166-1 alpha-2 country code (e.g., US, IN)    |
-| address       | TEXT      | NOT NULL                               | Church physical address                            |
-| pincode       | TEXT      | NOT NULL                               | Postal/ZIP code for duplicate prevention           |
+| address       | JSONB     | NOT NULL                               | Structured address data (see structure below)     |
 | currency_code | TEXT      | NOT NULL                               | ISO 4217 currency code (e.g., USD, INR, EUR)      |
 | timezone      | TEXT      | NOT NULL                               | Timezone for date/time calculations                |
-| logo_url      | TEXT      | NULLABLE                               | URL or path to church logo                         |
+| logo_url      | TEXT      | NULLABLE                               | URL or path to church logo (S3 or local)          |
 | is_active     | BOOLEAN   | NOT NULL, DEFAULT true                 | Whether the tenant is currently active             |
+
+Address JSONB Structure:
+{
+    "address_line1": "Plot 12, 2nd Street",
+    "address_line2": "Anna Nagar",           // Optional
+    "city": "Chennai",
+    "state": "Tamil Nadu",
+    "postal_code": "600040",
+    "country": "IN",                         // ISO 3166-1 alpha-2
+    "latitude": 13.0827,                     // Optional
+    "longitude": 80.2707                     // Optional
+}
 
 -- Create indexes for tenants table
 CREATE INDEX IF NOT EXISTS idx_tenants_slug ON tenants_metadata.tenants (slug);
 CREATE INDEX IF NOT EXISTS idx_tenants_schema_name ON tenants_metadata.tenants (schema_name);
-CREATE INDEX IF NOT EXISTS idx_tenants_country_code ON tenants_metadata.tenants (country_code);
 CREATE INDEX IF NOT EXISTS idx_tenants_is_active ON tenants_metadata.tenants (is_active);
 CREATE INDEX IF NOT EXISTS idx_tenants_church_id ON tenants_metadata.tenants (church_id);
-CREATE INDEX IF NOT EXISTS idx_tenants_pincode ON tenants_metadata.tenants (pincode);
+CREATE INDEX IF NOT EXISTS idx_tenants_country_code ON tenants_metadata.tenants ((address->>'country'));
+CREATE INDEX IF NOT EXISTS idx_tenants_postal_code ON tenants_metadata.tenants ((address->>'postal_code'));
 
 =================================================================
 USER MANAGEMENT
 =================================================================
 
--- Users table
+-- Users table (UPDATED WITH PHONE JSONB AND SEQUENTIAL USER_ID)
 CREATE TABLE IF NOT EXISTS tenants_metadata.users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP NOT NULL DEFAULT now(),
@@ -95,16 +104,18 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.users (
     tenant_id UUID NOT NULL REFERENCES tenants_metadata.tenants(id) ON DELETE CASCADE,
     tenant_slug TEXT NOT NULL,
     
+    -- User identification
+    user_id TEXT UNIQUE NOT NULL,
+    
     -- Basic information
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     email TEXT NOT NULL,
-    phone TEXT UNIQUE,  
-    user_id TEXT UNIQUE NOT NULL, 
+    phone JSONB,  
     
     -- Authentication
     password_hash TEXT NOT NULL,
-    role TEXT DEFAULT 'user',
+    role TEXT DEFAULT 'user' CHECK (role IN ('tenantadmin', 'admin', 'pastor', 'leader', 'user')),
     
     -- Verification status
     email_verified BOOLEAN NOT NULL DEFAULT false,
@@ -131,28 +142,27 @@ CREATE TABLE IF NOT EXISTS tenants_metadata.users (
     last_login_at TIMESTAMP,
     
     -- Constraints
-    UNIQUE(tenant_id, email),
-    CHECK (role IN ('tenantadmin', 'admin', 'pastor', 'user'))
+    UNIQUE(tenant_id, email)
 );
 
-Users table columns
+Users table columns (UPDATED)
 | Column Name                   | Data Type | Constraints                                       | Description                                      |
 | ----------------------------- | --------- | ------------------------------------------------- | ------------------------------------------------ |
 | id                            | UUID      | PRIMARY KEY, DEFAULT gen_random_uuid()            | User ID                                          |
 | created_at                    | TIMESTAMP | NOT NULL, DEFAULT now()                           | Record creation timestamp                        |
 | updated_at                    | TIMESTAMP | NOT NULL, DEFAULT now()                           | Record last update timestamp                     |
-| tenant_id                     | UUID      | NOT NULL, FK → tenants(id) ON DELETE CASCADE     | Associated tenant                                |
+| tenant_id                     | UUID      | NOT NULL, FK → tenants(id) ON DELETE CASCADE     | Associated tenant                                 |
 | tenant_slug                   | TEXT      | NOT NULL                                          | Cached tenant slug for optimization              |
+| user_id                       | TEXT      | UNIQUE, NOT NULL                                  | Sequential user identifier (01, 02, 03...9999)  |
 | first_name                    | TEXT      | NOT NULL                                          | First name                                       |
 | last_name                     | TEXT      | NOT NULL                                          | Last name                                        |
-| email                         | TEXT      | NOT NULL                                          | Login email                                      |
-| phone                         | TEXT      | UNIQUE                                            | Phone number                                     |
-| user_id                       | TEXT      | UNIQUE, NOT NULL                                  | Unique user identifier across tenants            |
+| email                         | TEXT      | NOT NULL                                          | Login email (unique within tenant)              |
+| phone                         | JSONB     | NULLABLE                                          | Phone number structure (see below)              |
 | password_hash                 | TEXT      | NOT NULL                                          | Bcrypt password hash                             |
-| role                          | TEXT      | DEFAULT 'user', CHECK IN roles                    | Role (superadmin,tenantadmin,admin,pastor,user)  |
+| role                          | TEXT      | DEFAULT 'user', CHECK IN roles                    | Role (tenantadmin, admin, pastor, leader, user) |
 | email_verified                | BOOLEAN   | NOT NULL, DEFAULT false                           | Email verification status                        |
 | phone_verified                | BOOLEAN   | NOT NULL, DEFAULT false                           | Phone verification status                        |
-| verification_token            | TEXT      | NULLABLE                                          | Token for email/phone verification               |
+| verification_token            | TEXT      | NULLABLE                                          | Token for email verification                     |
 | verification_token_expires_at | TIMESTAMP | NULLABLE                                          | Expiration time for verification token           |
 | mobile_verification_code      | TEXT      | NULLABLE                                          | Code for mobile verification                     |
 | mobile_verification_expires_at| TIMESTAMP | NULLABLE                                          | Expiration time for mobile verification          |
@@ -163,18 +173,24 @@ Users table columns
 | is_active                     | BOOLEAN   | NOT NULL, DEFAULT true                            | User active status                               |
 | last_login_at                 | TIMESTAMP | NULLABLE                                          | Last login time                                  |
 
+Phone JSONB Structure:
+{
+    "phone_country_code": "+91",
+    "phone_number": "9876543210"
+}
+
 -- Create indexes for users table
 CREATE INDEX IF NOT EXISTS idx_users_tenant_id ON tenants_metadata.users (tenant_id);
 CREATE INDEX IF NOT EXISTS idx_users_email ON tenants_metadata.users (email);
+CREATE INDEX IF NOT EXISTS idx_users_user_id ON tenants_metadata.users (user_id);
+CREATE INDEX IF NOT EXISTS idx_users_tenant_slug ON tenants_metadata.users (tenant_slug);
 CREATE INDEX IF NOT EXISTS idx_users_role ON tenants_metadata.users (role);
 CREATE INDEX IF NOT EXISTS idx_users_verification_status ON tenants_metadata.users (email_verified, phone_verified);
 CREATE INDEX IF NOT EXISTS idx_users_is_active ON tenants_metadata.users (is_active);
-CREATE INDEX IF NOT EXISTS idx_users_tenant_slug ON tenants_metadata.users (tenant_slug);
 CREATE INDEX IF NOT EXISTS idx_users_phone ON tenants_metadata.users (phone) WHERE phone IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_users_user_id ON tenants_metadata.users (user_id);
 
 =================================================================
-AUTHENTICATION
+AUTHENTICATION (FUTURE - NOT YET IMPLEMENTED)
 =================================================================
 
 -- Refresh tokens table for JWT authentication
@@ -218,7 +234,7 @@ CREATE INDEX IF NOT EXISTS idx_refresh_tokens_expires_at ON tenants_metadata.ref
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_is_valid ON tenants_metadata.refresh_tokens (is_valid);
 
 =================================================================
-VERIFICATION TRACKING
+VERIFICATION TRACKING (FUTURE - NOT YET IMPLEMENTED)
 =================================================================
 
 -- Verification tracking table
