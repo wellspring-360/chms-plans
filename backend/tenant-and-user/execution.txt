@@ -266,3 +266,8 @@ Development Environment Status
 - Automated testing pipeline
 - Load testing environment
 - Production deployment scripts
+
+
+(api/tenants need authentication)
+need api for list all users
+once password reset want to logout all session
