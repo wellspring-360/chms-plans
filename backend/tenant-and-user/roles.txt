@@ -4,12 +4,9 @@ Role Hierarchy:
     * Full access to all tenant operations
     * tenant operations and management
     * full user management
-2) admin 
-    * only inside tenant operations
-    * not any user management
-3) pastor
+2) pastor
     * will plan later
-4) leader
+3) leader
     * will plan later
 4) user 
     * will plan later

@@ -1,0 +1,97 @@
+# 📘 Next.js Frontend Development Instructions
+
+Project: SaaS Multi-Tenant Church Management System  
+Frontend: Next.js (App Router preferred)  
+Backend: NestJS  
+Goal: Build the frontend in small, testable, multi-tenant-aware chunks  
+Code Guideline: Always use minimal diffs only — do not rewrite full files.
+
+---
+
+## 🔁 Development Workflow (Strict Step-by-Step)
+
+### 1. One Chunk at a Time
+Each task or feature must follow this flow:
+
+1. Concept Explanation  
+   - Describe in simple terms what this chunk is doing.
+
+2. Confirmation Before Code  
+   - Ask before writing any code. Wait for approval.
+
+3. Code Implementation  
+   - Minimal diffs only.  
+   - Show only changes in the file with clear path.  
+   - Support for `dev`, `staging`, and `prod`.
+
+4. Testing Instructions  
+   - Clear, manual steps or automated test guidance.  
+   - Include tenant-specific test cases.
+
+5. Fix Before Move  
+   - All bugs and feedback for a chunk must be resolved before moving forward.
+
+---
+
+## 👶 Beginner-Friendly Guidance
+
+- Keep explanations simple and direct.
+- Explain the “why” as much as the “how.”
+- Link to relevant docs if helpful.
+
+---
+
+## 🧱 Core Principles
+
+### 1. Multi-Tenant Support
+- Schema-based tenancy must be respected throughout.
+- Never hardcode tenant info.
+- Tenant context should be resolved from subdomain or headers.
+
+### 2. Environment Awareness
+- All code must support:
+  - `development`
+  - `staging`
+  - `production`
+- Provide `.env.development`, `.env.staging`, `.env.production` examples.
+- No environment-specific logic inside components — use a config helper.
+
+### 3. Stay Focused
+- One task at a time.
+- No parallel threads.
+- If uncertain, ask first — don’t assume.
+
+---
+
+## 🧾 Logging & Error Handling
+
+### 1. Meaningful Logging
+- Use a standard logging utility (e.g., `console.log` wrapped in `logger.ts`).
+- Include:
+  - `tenantId`
+  - `userId`
+  - `action`
+- Do not log:
+  - passwords
+  - tokens
+  - secrets
+
+### 2. User-Friendly Errors
+- Catch and handle errors cleanly.
+- Show only safe messages in the UI.
+- Never expose stack traces to users.
+
+---
+
+## 🧼 Code Quality
+
+### 1. Minimal Diffs
+STRICT: Only show the part of the file that changed.  
+Example:
+```diff
+// app/layout.tsx
++ import { TenantContextProvider } from '@/lib/tenant-context';
+
+<Layout>
++ <TenantContextProvider>{children}</TenantContextProvider>
+</Layout>
