@@ -1,0 +1,113 @@
+🔌 Backend Integration Points
+
+Authentication APIs
+- `POST /api/auth/register-tenant` - Tenant + admin user creation
+- `POST /api/auth/login` - User authentication
+- `POST /api/auth/refresh` - Token refresh
+- `POST /api/auth/verify-email/{token}` - Email verification
+- `POST /api/auth/forgot-password` - Password reset request
+- `POST /api/auth/reset-password` - Password reset completion
+
+Tenant Management APIs
+- `GET /api/tenants/{slug}` - Get tenant details
+- `PATCH /api/tenants/{slug}` - Update tenant
+- `POST /api/tenants/{slug}/logo` - Upload logo
+- `DELETE /api/tenants/{slug}/logo` - Delete logo
+
+User Management APIs
+- `GET /api/{tenant-slug}/users` - List users
+- `POST /api/{tenant-slug}/users` - Create user
+- `GET /api/{tenant-slug}/users/{id}` - Get user details
+- `PATCH /api/{tenant-slug}/users/{id}` - Update user
+- `POST /api/{tenant-slug}/users/{id}/activate` - Activate user
+- `POST /api/{tenant-slug}/users/{id}/deactivate` - Deactivate user
+- `DELETE /api/{tenant-slug}/users/{id}` - Delete user
+
+---
+
+📱 Key Features Implementation
+
+Multi-Tenant Routing
+```typescript
+// Tenant resolution from URL: app.com/{church-slug}
+// Context provider for tenant state management
+// Middleware for tenant validation
+```
+
+Authentication Flow
+```typescript
+// JWT token management with refresh
+// Real-time status validation
+// Email verification workflow
+// Password reset with secure tokens
+```
+
+User Management
+```typescript
+// Role-based user creation (tenantadmin, admin, pastor, leader, user)
+// Sequential user ID display (01, 02, 03...9999)
+// Phone/email validation with libphonenumber-js
+// Activate/deactivate with safety checks
+```
+
+Form Validation
+```typescript
+// Structured address validation (country-specific)
+// Phone number validation with country matching
+// Email uniqueness checking
+// Real-time validation feedback
+```
+
+---
+
+🔄 Development Workflow
+
+Per-Phase Process
+1. Concept Explanation - Clear description of chunk functionality
+2. Confirmation Before Code - Wait for approval before implementation
+3. Minimal Code Diffs - Show only changed parts with file paths
+4. Testing Instructions - Manual steps and tenant-specific tests
+5. Fix Before Move - Resolve all issues before next phase
+
+Quality Standards
+- TypeScript strict mode
+- ESLint + Prettier configuration
+- Mobile-first responsive design
+- Accessibility compliance (WCAG 2.1)
+- Performance optimization
+- Error boundary implementation
+
+---
+
+🎨 UI/UX Design Principles
+
+Visual Design
+- Professional church management aesthetic
+- Clean, modern dashboard layout
+- Consistent color scheme and typography
+- Intuitive navigation structure
+- Mobile-optimized interface
+
+User Experience
+- Progressive form completion
+- Real-time validation feedback
+- Loading states and error handling
+- Keyboard navigation support
+- Clear call-to-action buttons
+
+---
+
+🧪 Testing Strategy
+
+Manual Testing
+- Multi-tenant isolation verification
+- Authentication flow testing
+- Form validation testing
+- Mobile responsiveness testing
+- Cross-browser compatibility
+
+Automated Testing (Future)
+- Unit tests for components
+- Integration tests for API calls
+- E2E tests for critical flows
+- Performance testing

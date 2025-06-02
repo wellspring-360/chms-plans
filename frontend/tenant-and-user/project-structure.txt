@@ -1,0 +1,76 @@
+Project Structure
+
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/page.tsx
+│   │   ├── register/page.tsx
+│   │   ├── verify-email/[token]/page.tsx
+│   │   └── reset-password/page.tsx
+│   ├── [tenant]/
+│   │   ├── dashboard/page.tsx
+│   │   ├── users/page.tsx
+│   │   ├── users/create/page.tsx
+│   │   ├── users/[id]/page.tsx
+│   │   └── settings/page.tsx
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── auth/
+│   │   ├── LoginForm.tsx
+│   │   ├── RegisterForm.tsx
+│   │   ├── VerifyEmail.tsx
+│   │   └── ResetPassword.tsx
+│   ├── tenant/
+│   │   ├── TenantRegistration.tsx
+│   │   ├── LogoUpload.tsx
+│   │   └── ChurchSettings.tsx
+│   ├── users/
+│   │   ├── UserList.tsx
+│   │   ├── UserForm.tsx
+│   │   ├── UserCard.tsx
+│   │   └── UserActions.tsx
+│   ├── ui/
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Modal.tsx
+│   │   └── LoadingSpinner.tsx
+│   └── layout/
+│       ├── Header.tsx
+│       ├── Sidebar.tsx
+│       └── ProtectedRoute.tsx
+├── contexts/
+│   ├── TenantContext.tsx
+│   ├── AuthContext.tsx
+│   └── APIContext.tsx
+├── lib/
+│   ├── api-client.ts
+│   ├── config.ts
+│   ├── validators.ts
+│   ├── utils.ts
+│   └── constants.ts
+├── types/
+│   ├── auth.ts
+│   ├── tenant.ts
+│   ├── user.ts
+│   └── api.ts
+└── hooks/
+    ├── useAuth.ts
+    ├── useTenant.ts
+    ├── useUsers.ts
+    └── useAPI.ts
+
+Environment Configuration
+```
+.env.development:
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+NEXT_PUBLIC_APP_URL=http://localhost:3001
+
+.env.staging:
+NEXT_PUBLIC_API_URL=https://api-staging.wellspring360.com/api
+NEXT_PUBLIC_APP_URL=https://app-staging.wellspring360.com
+
+.env.production:
+NEXT_PUBLIC_API_URL=https://api.wellspring360.com/api
+NEXT_PUBLIC_APP_URL=https://app.wellspring360.com
+```

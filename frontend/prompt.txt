@@ -1,4 +1,4 @@
-# 📘 Next.js Frontend Development Instructions
+# 📘 Next.js Frontend Development Instructions app name: WellSpring360
 
 Project: SaaS Multi-Tenant Church Management System  
 Frontend: Next.js (App Router preferred)  
